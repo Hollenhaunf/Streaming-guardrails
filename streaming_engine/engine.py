@@ -12,6 +12,7 @@ from streaming_engine.data_classes import (
     StreamResult,
     WindowMode,
 )
+import pysbd
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,10 @@ class StreamingEngine:
         self.chunk_size = chunk_size
         self.window = WindowMode(window)
         self.max_sentence_tokens = max_sentence_tokens
+        self.sentence_segmenter = pysbd.Segmenter(
+            language="en",
+            clean=False,
+        )
         self.stop_on_unsafe = stop_on_unsafe
 
         logger.debug(
@@ -69,8 +74,31 @@ class StreamingEngine:
 
         return text
 
-    def _sentence_boundary(self, text: str) -> bool:
+    # def _sentence_boundary(self, text: str) -> bool:
 
+    #     if not text:
+    #         return False
+
+    #     stripped = text.rstrip()
+
+    #     if not stripped:
+    #         return False
+
+    #     result = bool(
+    #         re.search(
+    #             r"""(?:[.!?。！？]+["'»”’)**\\]**]\*|**\n**\s\***\n**)$""",
+    #             stripped,
+    #         )
+    #     )
+
+    #     logger.debug(
+    #         "_sentence_boundary: text=%r result=%s",
+    #         text,
+    #         result,
+    #     )
+
+    #     return result
+    def _sentence_boundary(self, text: str) -> bool:
         if not text:
             return False
 
@@ -79,16 +107,25 @@ class StreamingEngine:
         if not stripped:
             return False
 
-        result = bool(
-            re.search(
-                r"""(?:[.!?。！？]+["'»”’)**\\]**]\*|**\n**\s\***\n**)$""",
-                stripped,
-            )
-        )
+        segments = self.sentence_segmenter.segment(stripped)
+
+        if len(segments) <= 1:
+            return False
+
+        last_segment = segments[-1].strip()
+
+        if not last_segment:
+            return True
+
+        if last_segment == stripped:
+            return False
+
+        result = True
 
         logger.debug(
-            "_sentence_boundary: text=%r result=%s",
+            "_sentence_boundary: text=%r segments=%r result=%s",
             text,
+            segments,
             result,
         )
 
