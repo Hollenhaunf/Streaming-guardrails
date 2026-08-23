@@ -69,6 +69,13 @@ class GuardAdapter:
     ) -> Decision:
         raise NotImplementedError
 
+    def score_local(
+        self,
+        prompt: str,
+        text: str,
+    ) -> Decision:
+        return self.score_prefix(prompt, text)
+
 
 class CallableGuard(GuardAdapter):
     def __init__(self, fn):

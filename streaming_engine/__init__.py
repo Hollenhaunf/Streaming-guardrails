@@ -10,10 +10,6 @@ from streaming_engine.data_classes import (
     StreamResult,
 )
 
-from streaming_engine.qwen3_adapter import (
-    Qwen3GuardStreamAdapter,
-)
-
 __all__ = [
     "StreamingEngine",
     "CheckMode",
@@ -23,5 +19,4 @@ __all__ = [
     "Decision",
     "Event",
     "StreamResult",
-    "Qwen3GuardStreamAdapter",
 ]
